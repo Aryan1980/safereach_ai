@@ -67,12 +67,17 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Leaflet map dark styling */
+/* Leaflet map dark styling & Keyless 100% Free Dark Tiles */
 .leaflet-container {
   font-family: inherit;
   width: 100%;
   height: 100%;
   background: #07070a !important;
+}
+
+/* Dark mode filter on standard keyless OpenStreetMap tiles (Zero API key required, Zero watermark) */
+.dark-map-tiles .leaflet-tile {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.2) brightness(0.7);
 }
 
 .leaflet-popup-content-wrapper {
