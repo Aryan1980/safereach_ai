@@ -40,6 +40,7 @@ interface OverpassElement {
     tourism?: string;
     healthcare?: string;
     emergency?: string;
+    government?: string;
     'addr:street'?: string;
     'addr:housenumber'?: string;
     'addr:suburb'?: string;
@@ -59,24 +60,24 @@ interface OverpassResponse {
 }
 
 /**
- * Queries OpenStreetMap Overpass API for real-world safe havens:
- * Police, Hospitals, Metro/Subway stations, Shopping Malls, 24/7 Fuel Stations, Hotels, Banks/ATMs, and Pharmacies.
+ * Builds resilient Overpass QL query covering metropolitan and suburban locations
  */
-export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: number = 5000): Promise<SafePlace[]> {
-  const { lat, lng } = coords;
-
-  const query = `
+function buildOverpassQuery(lat: number, lng: number, radiusMeters: number): string {
+  return `
     [out:json][timeout:25];
     (
       node["amenity"="police"](around:${radiusMeters},${lat},${lng});
       way["amenity"="police"](around:${radiusMeters},${lat},${lng});
       node["amenity"="police_booth"](around:${radiusMeters},${lat},${lng});
+      node["government"="public_safety"](around:${radiusMeters},${lat},${lng});
       node["amenity"="hospital"](around:${radiusMeters},${lat},${lng});
       way["amenity"="hospital"](around:${radiusMeters},${lat},${lng});
       node["amenity"="clinic"](around:${radiusMeters},${lat},${lng});
       way["amenity"="clinic"](around:${radiusMeters},${lat},${lng});
+      node["amenity"="doctors"](around:${radiusMeters},${lat},${lng});
       node["healthcare"="hospital"](around:${radiusMeters},${lat},${lng});
       way["healthcare"="hospital"](around:${radiusMeters},${lat},${lng});
+      node["healthcare"="clinic"](around:${radiusMeters},${lat},${lng});
       node["railway"="station"](around:${radiusMeters},${lat},${lng});
       way["railway"="station"](around:${radiusMeters},${lat},${lng});
       node["station"="subway"](around:${radiusMeters},${lat},${lng});
@@ -94,15 +95,40 @@ export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: n
       node["tourism"="hotel"](around:${radiusMeters},${lat},${lng});
       way["tourism"="hotel"](around:${radiusMeters},${lat},${lng});
       node["amenity"="bank"](around:${radiusMeters},${lat},${lng});
+      way["amenity"="bank"](around:${radiusMeters},${lat},${lng});
       node["amenity"="atm"](around:${radiusMeters},${lat},${lng});
       node["amenity"="pharmacy"](around:${radiusMeters},${lat},${lng});
       way["amenity"="pharmacy"](around:${radiusMeters},${lat},${lng});
+      node["healthcare"="pharmacy"](around:${radiusMeters},${lat},${lng});
       node["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});
       way["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});
     );
     out center 150 tags;
   `;
+}
 
+/**
+ * Queries OpenStreetMap Overpass API for real-world safe havens.
+ * Automatically expands search radius up to 12km if initial radius returns zero places.
+ */
+export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: number = 5000): Promise<SafePlace[]> {
+  const { lat, lng } = coords;
+
+  // 1. First attempt at requested radius
+  let places = await executeQueryWithFallback(lat, lng, radiusMeters);
+
+  // 2. Adaptive radius expansion: If zero places found (e.g. in residential/suburban areas), auto-expand
+  if (places.length === 0 && radiusMeters < 12000) {
+    const expandedRadius = Math.max(radiusMeters * 2, 10000);
+    places = await executeQueryWithFallback(lat, lng, expandedRadius);
+  }
+
+  // Sort by distance ascending
+  return places.sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
+async function executeQueryWithFallback(lat: number, lng: number, radiusMeters: number): Promise<SafePlace[]> {
+  const query = buildOverpassQuery(lat, lng, radiusMeters);
   let lastError: Error | null = null;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
@@ -123,10 +149,7 @@ export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: n
       }
 
       const data: OverpassResponse = await response.json();
-      const places = parseOverpassElements(data.elements || [], lat, lng);
-      
-      // Sort by distance ascending
-      return places.sort((a, b) => a.distanceKm - b.distanceKm);
+      return parseOverpassElements(data.elements || [], lat, lng);
     } catch (err) {
       console.warn(`Overpass query failed on ${endpoint}:`, err);
       lastError = err as Error;
@@ -155,13 +178,14 @@ function parseOverpassElements(elements: OverpassElement[], userLat: number, use
     const shop = tags.shop || '';
     const tourism = tags.tourism || '';
     const healthcare = tags.healthcare || '';
+    const government = tags.government || '';
 
     let type: SafePlaceType = 'safe_haven';
     let defaultName = 'Verified Safe Location';
     let securityFeature = 'Public Safety Haven';
 
     // 1. Police
-    if (amenity === 'police' || amenity === 'police_booth') {
+    if (amenity === 'police' || amenity === 'police_booth' || government === 'public_safety') {
       type = 'police';
       defaultName = amenity === 'police_booth' ? 'Police Assistance Booth' : 'Police Station';
       securityFeature = 'Active Police Officers • Immediate Response';
@@ -190,10 +214,16 @@ function parseOverpassElements(elements: OverpassElement[], userLat: number, use
       securityFeature = 'Entry Security Guards • Metal Detectors • Active Crowds';
     }
     // 4. Hospitals & Clinics
-    else if (amenity === 'hospital' || amenity === 'clinic' || healthcare === 'hospital' || healthcare === 'clinic') {
+    else if (
+      amenity === 'hospital' || 
+      amenity === 'clinic' || 
+      amenity === 'doctors' || 
+      healthcare === 'hospital' || 
+      healthcare === 'clinic'
+    ) {
       type = 'hospital';
       defaultName = amenity === 'hospital' || healthcare === 'hospital' ? 'Hospital / Emergency Care' : 'Medical Care Clinic';
-      securityFeature = '24/7 Medical Staff • Emergency Room';
+      securityFeature = '24/7 Medical Staff • Emergency Care';
     }
     // 5. 24/7 Fuel Stations / Petrol Pumps
     else if (amenity === 'fuel') {
@@ -225,7 +255,7 @@ function parseOverpassElements(elements: OverpassElement[], userLat: number, use
       defaultName = 'Fire & Rescue Station';
       securityFeature = 'Emergency First Responders • 24/7 Staffed';
     } else {
-      continue; // Skip unrecognized
+      continue;
     }
 
     const name = tags.name || tags['name:en'] || defaultName;

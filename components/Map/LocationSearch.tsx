@@ -11,6 +11,15 @@ interface LocationSearchProps {
   isLoadingLocation?: boolean;
 }
 
+const POPULAR_AREAS = [
+  { name: 'Connaught Place, Delhi', lat: 28.6315, lng: 77.2167 },
+  { name: 'Indiranagar, Bengaluru', lat: 12.9784, lng: 77.6408 },
+  { name: 'Bandra West, Mumbai', lat: 19.0596, lng: 72.8295 },
+  { name: 'Hitec City, Hyderabad', lat: 17.4435, lng: 78.3772 },
+  { name: 'Kothrud, Pune', lat: 18.5074, lng: 73.8077 },
+  { name: 'Park Street, Kolkata', lat: 22.5529, lng: 88.3534 },
+];
+
 export default function LocationSearch({
   onLocationSelect,
   onRequestCurrentLocation,
@@ -71,8 +80,24 @@ export default function LocationSearch({
     setIsOpen(false);
   };
 
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (suggestions.length > 0) {
+        handleSelect(suggestions[0]);
+      } else if (query.trim().length >= 2) {
+        setIsSearching(true);
+        const results = await searchLocations(query);
+        setIsSearching(false);
+        if (results.length > 0) {
+          handleSelect(results[0]);
+        }
+      }
+    }
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full font-mono">
+    <div ref={containerRef} className="relative w-full font-mono space-y-2.5">
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search input */}
         <div className="relative flex-1">
@@ -86,9 +111,10 @@ export default function LocationSearch({
 
           <input
             type="text"
-            placeholder="Search address, neighborhood, metro station, or landmark..."
+            placeholder="Type any locality, street, landmark or city (e.g. Rohini, Indiranagar, Bandra)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             onFocus={() => suggestions.length > 0 && setIsOpen(true)}
             className="w-full bg-[#08080c] border border-white/[0.08] hover:border-white/20 focus:border-white/40 rounded-xl pl-11 pr-10 py-3 text-xs text-white placeholder-zinc-500 focus:outline-none transition-all shadow-inner font-sans"
           />
@@ -118,9 +144,26 @@ export default function LocationSearch({
         </button>
       </div>
 
+      {/* Popular Area Quick Selectors */}
+      <div className="flex items-center space-x-2 overflow-x-auto pb-1 text-[10px] scrollbar-none">
+        <span className="text-zinc-500 uppercase shrink-0">Popular Localities:</span>
+        {POPULAR_AREAS.map((area) => (
+          <button
+            key={area.name}
+            onClick={() => {
+              onLocationSelect({ lat: area.lat, lng: area.lng, address: area.name }, area.name);
+              setQuery(area.name);
+            }}
+            className="px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-white border border-white/[0.06] shrink-0 transition-colors"
+          >
+            {area.name.split(',')[0]}
+          </button>
+        ))}
+      </div>
+
       {/* Autocomplete Dropdown */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#0a0a0f] border border-white/[0.12] rounded-xl shadow-2xl z-50 overflow-hidden max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0a0a0f] border border-white/[0.12] rounded-xl shadow-2xl z-50 overflow-hidden max-h-64 overflow-y-auto">
           {suggestions.map((item) => (
             <button
               key={item.place_id}
