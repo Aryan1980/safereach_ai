@@ -11,15 +11,6 @@ interface LocationSearchProps {
   isLoadingLocation?: boolean;
 }
 
-const POPULAR_AREAS = [
-  { name: 'Connaught Place, Delhi', lat: 28.6315, lng: 77.2167 },
-  { name: 'Indiranagar, Bengaluru', lat: 12.9784, lng: 77.6408 },
-  { name: 'Bandra West, Mumbai', lat: 19.0596, lng: 72.8295 },
-  { name: 'Hitec City, Hyderabad', lat: 17.4435, lng: 78.3772 },
-  { name: 'Kothrud, Pune', lat: 18.5074, lng: 73.8077 },
-  { name: 'Park Street, Kolkata', lat: 22.5529, lng: 88.3534 },
-];
-
 export default function LocationSearch({
   onLocationSelect,
   onRequestCurrentLocation,
@@ -97,7 +88,7 @@ export default function LocationSearch({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full font-mono space-y-2.5">
+    <div ref={containerRef} className="relative w-full font-mono">
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search input */}
         <div className="relative flex-1">
@@ -111,7 +102,7 @@ export default function LocationSearch({
 
           <input
             type="text"
-            placeholder="Type any locality, street, landmark or city (e.g. Rohini, Indiranagar, Bandra)..."
+            placeholder="Type any city, street, neighborhood, or landmark worldwide..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -142,23 +133,6 @@ export default function LocationSearch({
           )}
           <span>{isLoadingLocation ? 'ACQUIRING...' : 'USE MY GPS'}</span>
         </button>
-      </div>
-
-      {/* Popular Area Quick Selectors */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 text-[10px] scrollbar-none">
-        <span className="text-zinc-500 uppercase shrink-0">Popular Localities:</span>
-        {POPULAR_AREAS.map((area) => (
-          <button
-            key={area.name}
-            onClick={() => {
-              onLocationSelect({ lat: area.lat, lng: area.lng, address: area.name }, area.name);
-              setQuery(area.name);
-            }}
-            className="px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-white border border-white/[0.06] shrink-0 transition-colors"
-          >
-            {area.name.split(',')[0]}
-          </button>
-        ))}
       </div>
 
       {/* Autocomplete Dropdown */}

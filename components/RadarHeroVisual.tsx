@@ -12,11 +12,9 @@ export default function RadarHeroVisual() {
     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => setCoords({ lat: 28.6139, lng: 77.2090 }),
-        { timeout: 5000 }
+        () => setCoords(null),
+        { timeout: 6000 }
       );
-    } else {
-      setCoords({ lat: 28.6139, lng: 77.2090 });
     }
 
     const interval = setInterval(() => {
@@ -27,9 +25,9 @@ export default function RadarHeroVisual() {
   }, []);
 
   const nodes = [
-    { label: 'CENTRAL METRO STATION', dist: '0.35 KM', type: 'TRANSIT & GUARDS', angle: 45, radius: 110, icon: Shield },
-    { label: 'METROPOLIS MALL & PLAZA', dist: '0.85 KM', type: 'CROWD & GUARDS', angle: 135, radius: 155, icon: MapPin },
-    { label: 'POLICE HEADQUARTERS', dist: '0.45 KM', type: 'POLICE POST', angle: 225, radius: 95, icon: Radio },
+    { label: 'METRO TRANSIT STATION', dist: '0.35 KM', type: 'TRANSIT & GUARDS', angle: 45, radius: 110, icon: Shield },
+    { label: 'COMMERCIAL CENTER & PLAZA', dist: '0.85 KM', type: 'CROWD & GUARDS', angle: 135, radius: 155, icon: MapPin },
+    { label: 'POLICE ASSISTANCE POST', dist: '0.45 KM', type: 'POLICE POST', angle: 225, radius: 95, icon: Radio },
     { label: '24/7 EMERGENCY HOSPITAL', dist: '1.20 KM', type: 'MEDICAL & SECURITY', angle: 315, radius: 175, icon: Navigation },
   ];
 
@@ -51,7 +49,7 @@ export default function RadarHeroVisual() {
             <div>
               <span className="text-zinc-500">COORDINATES: </span>
               <span className="text-zinc-300">
-                {coords ? `${coords.lat.toFixed(4)}° N, ${coords.lng.toFixed(4)}° E` : 'CALIBRATING...'}
+                {coords ? `${coords.lat.toFixed(4)}° N, ${coords.lng.toFixed(4)}° E` : 'LOCAL MESH SENSOR'}
               </span>
             </div>
             <div>
