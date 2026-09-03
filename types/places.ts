@@ -18,6 +18,21 @@ export interface Coordinates {
   address?: string;
 }
 
+export interface ScoreFactor {
+  title: string;
+  points: number;
+  maxPoints: number;
+  detail: string;
+}
+
+export interface SafeScoreData {
+  score: number;
+  label: 'High Safety Haven' | 'Very Safe Refuge' | 'Safe Public Location' | 'Moderate Refuge' | 'Insufficient Data';
+  scoreColor: string; // Tailwind color class
+  reasons: string[];
+  factors: ScoreFactor[];
+}
+
 export interface SafePlace {
   id: string;
   name: string;
@@ -33,6 +48,7 @@ export interface SafePlace {
   operator?: string;
   is24x7?: boolean;
   securityFeature?: string;
+  safeScore?: SafeScoreData;
   source: 'osm_overpass' | 'verified_emergency';
 }
 

@@ -1,4 +1,5 @@
 import { Coordinates, SafePlace, SafePlaceType } from '@/types/places';
+import { calculateSafeScore } from './safetyScoring';
 
 /**
  * Calculates Haversine distance in Kilometers between two coordinates
@@ -109,7 +110,7 @@ function buildOverpassQuery(lat: number, lng: number, radiusMeters: number): str
 
 /**
  * Queries OpenStreetMap Overpass API for real-world safe havens.
- * Automatically expands search radius up to 12km if initial radius returns zero places.
+ * Automatically calculates dynamic Safe Scores based on the user's exact coordinates.
  */
 export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: number = 5000): Promise<SafePlace[]> {
   const { lat, lng } = coords;
@@ -117,14 +118,23 @@ export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: n
   // 1. First attempt at requested radius
   let places = await executeQueryWithFallback(lat, lng, radiusMeters);
 
-  // 2. Adaptive radius expansion: If zero places found (e.g. in residential/suburban areas), auto-expand
+  // 2. Adaptive radius expansion: If zero places found, auto-expand up to 12km
   if (places.length === 0 && radiusMeters < 12000) {
     const expandedRadius = Math.max(radiusMeters * 2, 10000);
     places = await executeQueryWithFallback(lat, lng, expandedRadius);
   }
 
+  // Count nearby emergency anchors (police / hospital) to enhance coverage score
+  const emergencyCount = places.filter((p) => p.type === 'police' || p.type === 'hospital').length;
+
+  // Calculate dynamic Safe Score for each location
+  const scoredPlaces = places.map((place) => ({
+    ...place,
+    safeScore: calculateSafeScore(place, emergencyCount),
+  }));
+
   // Sort by distance ascending
-  return places.sort((a, b) => a.distanceKm - b.distanceKm);
+  return scoredPlaces.sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 async function executeQueryWithFallback(lat: number, lng: number, radiusMeters: number): Promise<SafePlace[]> {

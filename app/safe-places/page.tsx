@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
   Compass,
   MapPin,
+  Info,
   Map as MapIcon,
   List as ListIcon
 } from 'lucide-react';
@@ -19,6 +20,7 @@ import { saveLastKnownLocation, getLastKnownLocation } from '@/services/contacts
 import PlaceCard from '@/components/Places/PlaceCard';
 import PlaceFilter from '@/components/Places/PlaceFilter';
 import LocationSearch from '@/components/Map/LocationSearch';
+import ScoreExplanationModal from '@/components/Places/ScoreExplanationModal';
 
 // Dynamically import Leaflet Map to prevent SSR issues
 const SafeMap = dynamic(() => import('@/components/Map/SafeMap'), {
@@ -46,6 +48,7 @@ export default function SafePlacesPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [radiusMeters, setRadiusMeters] = useState<number>(5000);
   const [mobileViewTab, setMobileViewTab] = useState<'map' | 'list'>('map');
+  const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
 
   const loadPlacesForCoords = useCallback(async (coords: Coordinates, radius: number = 5000) => {
     setIsLoadingPlaces(true);
@@ -123,7 +126,6 @@ export default function SafePlacesPage() {
           setErrorMessage('Unable to obtain live GPS fix. Please ensure location services are enabled on your device, or search manually below.');
         }
 
-        // Check if this specific user has previously saved their location on this device
         const cached = getLastKnownLocation();
         if (cached) {
           setMapCenter(cached);
@@ -135,7 +137,7 @@ export default function SafePlacesPage() {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0, // Never use stale cache across different users
+        maximumAge: 0,
       }
     );
   }, [loadPlacesForCoords, radiusMeters]);
@@ -182,14 +184,25 @@ export default function SafePlacesPage() {
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-8">
         <div className="space-y-2">
-          <span className="text-[11px] font-mono tracking-widest2 uppercase text-zinc-500 block">
-            RADAR DISCOVERY
-          </span>
+          <div className="flex items-center space-x-3">
+            <span className="text-[11px] font-mono tracking-widest2 uppercase text-zinc-500 block">
+              RADAR DISCOVERY
+            </span>
+            <span className="text-zinc-600 font-mono text-[11px]">•</span>
+            <button
+              onClick={() => setIsScoreModalOpen(true)}
+              className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 underline underline-offset-4"
+            >
+              <Info className="w-3.5 h-3.5" />
+              <span>How Safe Score is Calculated</span>
+            </button>
+          </div>
+
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
             Safe Place Locator
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 font-light max-w-xl leading-relaxed">
-            Real-time geospatial discovery of security-guarded, well-lit, crowded, and public safe havens (Metro Stations, Malls, Police, Hospitals, 24/7 Petrol Pumps, Hotel Lobbies, and Pharmacies).
+            Real-time geospatial discovery of safe havens with transparent, data-backed Safe Scores based on facility security, crowd footfall, and live proximity.
           </p>
         </div>
 
@@ -211,8 +224,8 @@ export default function SafePlacesPage() {
             <span>Browser Location Access Needed</span>
           </div>
           <p className="text-zinc-300 font-light leading-relaxed">
-            SafeReach AI needs your device location to find safe places directly around you.
-            If your browser blocked location, please tap the lock icon in your browser address bar and allow Location, or search your city/neighborhood below.
+            SafeReach AI needs your device location to calculate distances and safe scores for places directly around you.
+            If your browser blocked location, please allow Location access, or search your city/neighborhood below.
           </p>
           <div className="pt-1">
             <button
@@ -330,7 +343,7 @@ export default function SafePlacesPage() {
                 {isLoadingPlaces && (
                   <div className="flex items-center space-x-1.5 text-white">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>SCANNING MESH...</span>
+                    <span>CALCULATING SCORES...</span>
                   </div>
                 )}
               </div>
@@ -381,6 +394,7 @@ export default function SafePlacesPage() {
                       key={place.id}
                       place={place}
                       isSelected={selectedPlace?.id === place.id}
+                      onOpenScoreExplanation={() => setIsScoreModalOpen(true)}
                       onSelect={(p) => {
                         setSelectedPlace(p);
                         setMapCenter({ lat: p.lat, lng: p.lng });
@@ -402,11 +416,17 @@ export default function SafePlacesPage() {
           <div className="space-y-1 font-mono">
             <h3 className="font-bold text-base text-white uppercase tracking-wider">Search Any Location to Begin</h3>
             <p className="text-xs text-zinc-400 font-sans font-light max-w-sm mx-auto">
-              Type your locality, street, or landmark in the search box above to discover nearby safe havens.
+              Type your locality, street, or landmark in the search box above to discover nearby safe havens and calculate live Safe Scores.
             </p>
           </div>
         </div>
       ) : null}
+
+      {/* Methodology Modal */}
+      <ScoreExplanationModal
+        isOpen={isScoreModalOpen}
+        onClose={() => setIsScoreModalOpen(false)}
+      />
     </div>
   );
 }

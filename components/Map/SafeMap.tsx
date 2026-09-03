@@ -48,7 +48,7 @@ export default function SafeMap({
           scrollWheelZoom: true,
         });
 
-        // 100% Free, Keyless OpenStreetMap Tile Layer with dark filter (Zero API key watermark)
+        // 100% Free, Keyless OpenStreetMap Tile Layer with dark filter
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
@@ -180,13 +180,20 @@ export default function SafeMap({
         const marker = L.marker([place.lat, place.lng], { icon });
 
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+        const score = place.safeScore ? place.safeScore.score : null;
+        const scoreLabel = place.safeScore ? place.safeScore.label : '';
+
         const popupContent = `
-          <div style="font-family: system-ui, sans-serif; min-width: 200px; padding: 4px;">
-            <div style="font-size: 9px; font-family: monospace; letter-spacing: 0.15em; color: #a1a1aa; text-transform: uppercase; margin-bottom: 3px;">
-              ${tag} • ${place.distanceKm < 1 ? Math.round(place.distanceKm * 1000) + ' M' : place.distanceKm.toFixed(2) + ' KM'}
+          <div style="font-family: system-ui, sans-serif; min-width: 210px; padding: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 9px; font-family: monospace; letter-spacing: 0.15em; color: #a1a1aa; text-transform: uppercase;">
+                ${tag} • ${place.distanceKm < 1 ? Math.round(place.distanceKm * 1000) + ' M' : place.distanceKm.toFixed(2) + ' KM'}
+              </span>
+              ${score ? `<span style="font-size: 10px; font-family: monospace; font-weight: 700; color: #34d399; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); padding: 1px 5px; border-radius: 4px;">${score}/100</span>` : ''}
             </div>
-            <div style="font-weight: 700; font-size: 13px; color: #ffffff; margin-bottom: 4px;">${place.name}</div>
-            ${place.securityFeature ? `<div style="font-size: 10px; font-family: monospace; color: #34d399; margin-bottom: 6px;">${place.securityFeature}</div>` : ''}
+            <div style="font-weight: 700; font-size: 13px; color: #ffffff; margin-bottom: 3px;">${place.name}</div>
+            ${scoreLabel ? `<div style="font-size: 10px; font-family: monospace; color: #a1a1aa; margin-bottom: 4px;">Score: ${scoreLabel}</div>` : ''}
+            ${place.securityFeature ? `<div style="font-size: 10px; font-family: monospace; color: #6ee7b7; margin-bottom: 6px;">${place.securityFeature}</div>` : ''}
             ${place.address ? `<div style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.3;">${place.address}</div>` : ''}
             <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="display: block; text-align: center; background: #ffffff; color: #000000; padding: 6px 10px; border-radius: 8px; font-family: monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; margin-top: 4px;">
               Get Directions &rarr;

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   MapPin, 
   Navigation, 
@@ -12,7 +12,11 @@ import {
   Building,
   Flame,
   Zap,
-  Hotel
+  Hotel,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 import { SafePlace, SafePlaceType } from '@/types/places';
 
@@ -20,9 +24,12 @@ interface PlaceCardProps {
   place: SafePlace;
   onSelect?: (place: SafePlace) => void;
   isSelected?: boolean;
+  onOpenScoreExplanation?: () => void;
 }
 
-export default function PlaceCard({ place, onSelect, isSelected }: PlaceCardProps) {
+export default function PlaceCard({ place, onSelect, isSelected, onOpenScoreExplanation }: PlaceCardProps) {
+  const [isWhyExpanded, setIsWhyExpanded] = useState(false);
+
   const getTypeMeta = (type: SafePlaceType) => {
     switch (type) {
       case 'transit':
@@ -50,6 +57,7 @@ export default function PlaceCard({ place, onSelect, isSelected }: PlaceCardProp
 
   const meta = getTypeMeta(place.type);
   const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  const safeScore = place.safeScore;
 
   return (
     <div
@@ -60,8 +68,8 @@ export default function PlaceCard({ place, onSelect, isSelected }: PlaceCardProp
           : 'border-white/[0.07] hover:border-white/20 hover:bg-white/[0.03]'
       }`}
     >
-      <div className="space-y-3">
-        {/* Top Header: Category Tag + Distance */}
+      <div className="space-y-3.5">
+        {/* Top Header: Category Badge + Distance */}
         <div className="flex items-center justify-between gap-2 font-mono text-[10px] tracking-wider">
           <div className="flex items-center space-x-2">
             <span className={`px-2.5 py-0.5 rounded-full border font-semibold uppercase ${meta.badgeStyle}`}>
@@ -94,11 +102,81 @@ export default function PlaceCard({ place, onSelect, isSelected }: PlaceCardProp
           )}
         </div>
 
-        {/* Security & Public Presence Banner */}
-        {place.securityFeature && (
-          <div className="flex items-center space-x-1.5 bg-white/[0.03] border border-white/[0.06] px-2.5 py-1.5 rounded-lg text-[11px] font-mono text-zinc-300">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="truncate">{place.securityFeature}</span>
+        {/* Safe Score Banner */}
+        {safeScore && (
+          <div className={`rounded-xl p-3 border font-mono ${safeScore.scoreColor}`}>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className="text-[9px] uppercase tracking-widest text-zinc-400 block">
+                  SAFE SCORE
+                </span>
+                <div className="flex items-baseline space-x-1.5">
+                  <span className="text-lg font-black text-white">{safeScore.score}</span>
+                  <span className="text-xs text-zinc-400">/ 100</span>
+                  <span className="text-xs font-bold ml-1.5">• {safeScore.label}</span>
+                </div>
+              </div>
+
+              {onOpenScoreExplanation && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenScoreExplanation();
+                  }}
+                  className="text-[10px] text-zinc-400 hover:text-white flex items-center space-x-1 bg-white/[0.05] hover:bg-white/[0.1] px-2 py-1 rounded-md transition-colors"
+                >
+                  <Info className="w-3 h-3" />
+                  <span>Methodology</span>
+                </button>
+              )}
+            </div>
+
+            {/* Expandable "Why is this place safe?" trigger */}
+            <div className="mt-2.5 pt-2 border-t border-white/[0.08]">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsWhyExpanded(!isWhyExpanded);
+                }}
+                className="w-full flex items-center justify-between text-[11px] text-zinc-300 hover:text-white transition-colors"
+              >
+                <span className="font-bold uppercase tracking-wider flex items-center space-x-1">
+                  <span>Why is this place safe?</span>
+                  <span className="text-[10px] text-zinc-400 font-normal">({safeScore.reasons.length} factors)</span>
+                </span>
+                {isWhyExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+
+              {/* Expandable reasons list */}
+              {isWhyExpanded && (
+                <div className="mt-3 space-y-2.5 text-xs font-sans text-zinc-300 pt-1">
+                  {/* Verified data-backed reasons */}
+                  <div className="space-y-1.5">
+                    {safeScore.reasons.map((reason, idx) => (
+                      <div key={idx} className="flex items-start space-x-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                        <span className="leading-tight font-light">{reason}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Factor Breakdown Bars */}
+                  <div className="mt-3 pt-2.5 border-t border-white/[0.08] space-y-1.5 font-mono text-[10px]">
+                    <span className="text-zinc-500 uppercase tracking-wider block">Score Contribution Breakdown:</span>
+                    {safeScore.factors.map((f, fIdx) => (
+                      <div key={fIdx} className="flex items-center justify-between text-zinc-400">
+                        <span className="truncate pr-2">{f.title}:</span>
+                        <span className="text-zinc-200 font-bold shrink-0">
+                          +{f.points}/{f.maxPoints} pts
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -113,7 +191,7 @@ export default function PlaceCard({ place, onSelect, isSelected }: PlaceCardProp
         {/* Metadata Details */}
         {place.openingHours && (
           <div className="flex items-center space-x-1.5 text-[11px] font-mono text-zinc-500">
-            <Clock className="w-3.5 h-3.5 text-zinc-600" />
+            <Clock className="w-3 h-3 text-zinc-600" />
             <span>{place.openingHours}</span>
           </div>
         )}
