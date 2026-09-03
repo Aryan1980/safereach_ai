@@ -27,7 +27,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#0f172a',
+  themeColor: '#050508',
 };
 
 export default function RootLayout({
@@ -37,9 +37,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-slate-950 text-slate-100 antialiased selection:bg-rose-500 selection:text-white">
+      <body className="min-h-screen flex flex-col bg-[#050508] text-zinc-100 antialiased selection:bg-rose-500 selection:text-white relative">
+        {/* Ambient Animated GIF Background */}
+        <div className="fixed inset-0 pointer-events-none -z-30 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/background.gif"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover opacity-25 mix-blend-screen filter saturate-150 contrast-125"
+          />
+        </div>
+
+        {/* Dark Vignette & Mesh Overlays for Premium Readability */}
+        <div className="fixed inset-0 pointer-events-none -z-20 bg-gradient-to-b from-[#050508]/85 via-[#050508]/75 to-[#050508]/95 backdrop-blur-[2px]"></div>
+        <div className="fixed inset-0 pointer-events-none -z-10 bg-grid-subtle opacity-40"></div>
+
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 relative z-10">{children}</main>
         <Footer />
       </body>
     </html>
