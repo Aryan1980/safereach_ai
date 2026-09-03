@@ -38,20 +38,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className="min-h-screen flex flex-col bg-[#050508] text-zinc-100 antialiased selection:bg-rose-500 selection:text-white relative">
-        {/* Ambient Animated GIF Background */}
+        {/* Crisp & Bright Animated Background */}
         <div className="fixed inset-0 pointer-events-none -z-30 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/background.gif"
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover opacity-25 mix-blend-screen filter saturate-150 contrast-125"
+            className="w-full h-full object-cover opacity-80 filter brightness-110 saturate-125 contrast-110"
           />
         </div>
 
-        {/* Dark Vignette & Mesh Overlays for Premium Readability */}
-        <div className="fixed inset-0 pointer-events-none -z-20 bg-gradient-to-b from-[#050508]/85 via-[#050508]/75 to-[#050508]/95 backdrop-blur-[2px]"></div>
-        <div className="fixed inset-0 pointer-events-none -z-10 bg-grid-subtle opacity-40"></div>
+        {/* Minimal Vignette for Crisp Legibility Without Blur */}
+        <div className="fixed inset-0 pointer-events-none -z-20 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
+        <div className="fixed inset-0 pointer-events-none -z-10 bg-grid-subtle opacity-20"></div>
 
         <Navbar />
         <main className="flex-1 relative z-10">{children}</main>
