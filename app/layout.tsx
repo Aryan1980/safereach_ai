@@ -45,13 +45,15 @@ export default function RootLayout({
             src="/background.gif"
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover opacity-80 filter brightness-110 saturate-125 contrast-110"
+            className="w-full h-full object-cover opacity-85 filter brightness-110 saturate-125 contrast-110"
           />
         </div>
 
-        {/* Minimal Vignette for Crisp Legibility Without Blur */}
-        <div className="fixed inset-0 pointer-events-none -z-20 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
-        <div className="fixed inset-0 pointer-events-none -z-10 bg-grid-subtle opacity-20"></div>
+        {/* Diagonal Scanline / Hatch Texture Layer (as in the reference design) */}
+        <div className="fixed inset-0 pointer-events-none -z-20 bg-diagonal-stripes"></div>
+
+        {/* Smooth Vignette for Content Contrast */}
+        <div className="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-b from-black/40 via-transparent to-black/70"></div>
 
         <Navbar />
         <main className="flex-1 relative z-10">{children}</main>
