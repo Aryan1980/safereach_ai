@@ -26,9 +26,9 @@ import ScoreExplanationModal from '@/components/Places/ScoreExplanationModal';
 const SafeMap = dynamic(() => import('@/components/Map/SafeMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full min-h-[420px] bg-[#07070a] border border-white/[0.08] rounded-2xl flex flex-col items-center justify-center text-zinc-400 space-y-3 font-mono">
+    <div className="w-full h-full min-h-[420px] bg-[#07070a] border border-white/20 rounded-2xl flex flex-col items-center justify-center text-zinc-300 space-y-3 font-mono">
       <Loader2 className="w-6 h-6 animate-spin text-white" />
-      <span className="text-[11px] tracking-widest uppercase">INITIALIZING MAP MESH...</span>
+      <span className="text-[11px] tracking-widest uppercase font-bold text-zinc-200">INITIALIZING MAP MESH...</span>
     </div>
   ),
 });
@@ -181,36 +181,40 @@ export default function SafePlacesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8 text-zinc-100">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-8">
-        <div className="space-y-2">
-          <div className="flex items-center space-x-3">
-            <span className="text-[11px] font-mono tracking-widest2 uppercase text-zinc-500 block">
+      {/* Header Banner with High-Contrast Typography Hierarchy */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/15 pb-8">
+        <div className="space-y-3">
+          {/* Top Label & Methodology Pill */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[11px] font-mono tracking-widest2 uppercase text-zinc-200 font-bold block drop-shadow-sm">
               RADAR DISCOVERY
             </span>
-            <span className="text-zinc-600 font-mono text-[11px]">•</span>
+            <span className="text-zinc-500 font-mono text-[11px]">•</span>
             <button
               onClick={() => setIsScoreModalOpen(true)}
-              className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 underline underline-offset-4"
+              className="text-[11px] font-mono text-emerald-300 hover:text-emerald-200 font-semibold flex items-center space-x-1.5 underline underline-offset-4 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-0.5 rounded-md border border-emerald-500/30 transition-all drop-shadow-sm"
             >
-              <Info className="w-3.5 h-3.5" />
+              <Info className="w-3.5 h-3.5 text-emerald-400" />
               <span>How Safe Score is Calculated</span>
             </button>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          {/* Main Hero Heading */}
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight text-shadow-hero">
             Safe Place Locator
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 font-light max-w-xl leading-relaxed">
+
+          {/* Subtitle / Description - High Contrast Luminous Platinum Tone */}
+          <p className="text-xs sm:text-sm text-zinc-100 font-normal max-w-xl leading-relaxed text-shadow-subtle drop-shadow-sm">
             Real-time geospatial discovery of safe havens with transparent, data-backed Safe Scores based on facility security, crowd footfall, and live proximity.
           </p>
         </div>
 
         {/* Current Location Badge */}
-        <div className="glass-panel px-4 py-2.5 rounded-xl flex items-center space-x-3 border border-white/[0.08] font-mono text-xs">
+        <div className="glass-panel px-4 py-2.5 rounded-xl flex items-center space-x-3 border border-white/15 font-mono text-xs shadow-lg">
           <span className={`w-2 h-2 rounded-full ${userLocation ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-          <span className="text-zinc-500">ORIGIN:</span>
-          <span className="text-white font-bold max-w-[200px] truncate">
+          <span className="text-zinc-300 font-bold">ORIGIN:</span>
+          <span className="text-white font-bold max-w-[200px] truncate text-shadow-subtle">
             {currentAddress ? currentAddress : mapCenter ? `${mapCenter.lat.toFixed(4)}°, ${mapCenter.lng.toFixed(4)}°` : 'ACQUIRING GPS...'}
           </span>
         </div>
@@ -218,19 +222,19 @@ export default function SafePlacesPage() {
 
       {/* Permission Denied Notice */}
       {permissionState === 'denied' && (
-        <div className="glass-panel rounded-2xl p-6 border border-amber-500/30 text-xs space-y-3">
-          <div className="flex items-center space-x-2 font-mono font-bold text-amber-400 uppercase tracking-wider">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="glass-panel rounded-2xl p-6 border border-amber-500/40 text-xs space-y-3 bg-[#0e0e14]/90">
+          <div className="flex items-center space-x-2 font-mono font-bold text-amber-300 uppercase tracking-wider">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
             <span>Browser Location Access Needed</span>
           </div>
-          <p className="text-zinc-300 font-light leading-relaxed">
+          <p className="text-zinc-200 font-normal leading-relaxed">
             SafeReach AI needs your device location to calculate distances and safe scores for places directly around you.
             If your browser blocked location, please allow Location access, or search your city/neighborhood below.
           </p>
           <div className="pt-1">
             <button
               onClick={requestCurrentLocation}
-              className="inline-flex items-center space-x-1.5 bg-white text-black px-4 py-2 rounded-xl font-mono font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all"
+              className="inline-flex items-center space-x-1.5 bg-white text-black px-4 py-2 rounded-xl font-mono font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all shadow-md"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Allow My GPS Location</span>
@@ -241,11 +245,11 @@ export default function SafePlacesPage() {
 
       {/* Location Acquisition Loading State for First-Time Users */}
       {isLoadingLocation && !mapCenter && (
-        <div className="glass-panel rounded-3xl p-12 text-center border border-white/[0.08] space-y-4">
+        <div className="glass-panel rounded-3xl p-12 text-center border border-white/15 space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-white mx-auto" />
           <div className="space-y-1 font-mono">
-            <h3 className="font-bold text-base text-white uppercase tracking-wider">Acquiring Your Live GPS Position...</h3>
-            <p className="text-xs text-zinc-400 font-sans font-light max-w-sm mx-auto">
+            <h3 className="font-bold text-base text-white uppercase tracking-wider text-shadow-subtle">Acquiring Your Live GPS Position...</h3>
+            <p className="text-xs text-zinc-200 font-sans font-normal max-w-sm mx-auto">
               Please click &quot;Allow&quot; when prompted by your browser to locate safe havens near your exact location.
             </p>
           </div>
@@ -272,11 +276,11 @@ export default function SafePlacesPage() {
 
             <div className="flex items-center space-x-3 self-end sm:self-auto font-mono text-xs">
               {/* Mobile Map / List toggle */}
-              <div className="flex lg:hidden glass-panel rounded-xl p-1 border border-white/[0.08]">
+              <div className="flex lg:hidden glass-panel rounded-xl p-1 border border-white/15">
                 <button
                   onClick={() => setMobileViewTab('map')}
                   className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    mobileViewTab === 'map' ? 'bg-white text-black' : 'text-zinc-400'
+                    mobileViewTab === 'map' ? 'bg-white text-black' : 'text-zinc-300'
                   }`}
                 >
                   <MapIcon className="w-3.5 h-3.5" />
@@ -285,7 +289,7 @@ export default function SafePlacesPage() {
                 <button
                   onClick={() => setMobileViewTab('list')}
                   className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    mobileViewTab === 'list' ? 'bg-white text-black' : 'text-zinc-400'
+                    mobileViewTab === 'list' ? 'bg-white text-black' : 'text-zinc-300'
                   }`}
                 >
                   <ListIcon className="w-3.5 h-3.5" />
@@ -293,9 +297,9 @@ export default function SafePlacesPage() {
                 </button>
               </div>
 
-              <div className="hidden sm:flex items-center space-x-2 text-[11px] text-zinc-400 glass-panel px-3 py-1.5 rounded-xl border border-white/[0.08]">
-                <SlidersHorizontal className="w-3 h-3 text-zinc-500" />
-                <span className="uppercase text-zinc-500">Radius:</span>
+              <div className="hidden sm:flex items-center space-x-2 text-[11px] text-zinc-200 glass-panel px-3 py-1.5 rounded-xl border border-white/15 font-semibold">
+                <SlidersHorizontal className="w-3 h-3 text-zinc-400" />
+                <span className="uppercase text-zinc-300 font-bold">Radius:</span>
                 <select
                   value={radiusMeters}
                   onChange={(e) => {
@@ -303,7 +307,7 @@ export default function SafePlacesPage() {
                     setRadiusMeters(r);
                     loadPlacesForCoords(mapCenter, r);
                   }}
-                  className="bg-black border border-white/[0.12] text-white rounded-md px-2 py-0.5 text-xs focus:outline-none font-mono"
+                  className="bg-black/80 border border-white/20 text-white rounded-md px-2 py-0.5 text-xs focus:outline-none font-mono"
                 >
                   <option value="3000">3 KM</option>
                   <option value="5000">5 KM</option>
@@ -338,11 +342,11 @@ export default function SafePlacesPage() {
                 mobileViewTab === 'map' ? 'hidden lg:block' : 'block'
               }`}
             >
-              <div className="flex items-center justify-between font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between font-mono text-[11px] text-zinc-200 uppercase tracking-wider font-bold">
                 <span>{filteredPlaces.length} VERIFIED HAVENS</span>
                 {isLoadingPlaces && (
                   <div className="flex items-center space-x-1.5 text-white">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
                     <span>CALCULATING SCORES...</span>
                   </div>
                 )}
@@ -350,9 +354,9 @@ export default function SafePlacesPage() {
 
               {/* Error notice */}
               {errorMessage && (
-                <div className="glass-panel border border-rose-500/30 text-rose-300 p-4 rounded-xl text-xs flex items-start space-x-2">
+                <div className="glass-panel border border-rose-500/40 text-rose-200 p-4 rounded-xl text-xs flex items-start space-x-2">
                   <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{errorMessage}</span>
+                  <span className="font-medium">{errorMessage}</span>
                 </div>
               )}
 
@@ -360,21 +364,21 @@ export default function SafePlacesPage() {
               {isLoadingPlaces && places.length === 0 ? (
                 <div className="space-y-3">
                   {[1, 2, 3, 4].map((n) => (
-                    <div key={n} className="glass-panel rounded-2xl p-5 border border-white/[0.06] animate-pulse space-y-3">
-                      <div className="h-3 bg-white/[0.06] rounded w-1/4"></div>
-                      <div className="h-5 bg-white/[0.06] rounded w-3/4"></div>
-                      <div className="h-3 bg-white/[0.06] rounded w-1/2"></div>
+                    <div key={n} className="glass-panel rounded-2xl p-5 border border-white/10 animate-pulse space-y-3">
+                      <div className="h-3 bg-white/10 rounded w-1/4"></div>
+                      <div className="h-5 bg-white/10 rounded w-3/4"></div>
+                      <div className="h-3 bg-white/10 rounded w-1/2"></div>
                     </div>
                   ))}
                 </div>
               ) : filteredPlaces.length === 0 ? (
-                <div className="glass-panel rounded-2xl p-10 text-center space-y-4 border border-white/[0.08]">
-                  <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400 mx-auto">
+                <div className="glass-panel rounded-2xl p-10 text-center space-y-4 border border-white/15">
+                  <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-zinc-300 mx-auto">
                     <Compass className="w-5 h-5" />
                   </div>
                   <div className="space-y-1 font-mono">
                     <h4 className="font-bold text-white text-sm uppercase">No Havens In Current Filter</h4>
-                    <p className="text-xs text-zinc-500 max-w-xs mx-auto font-sans font-light">
+                    <p className="text-xs text-zinc-300 max-w-xs mx-auto font-sans font-normal">
                       Select &quot;ALL HAVENS&quot; or expand the radius parameter to see more locations.
                     </p>
                   </div>
@@ -382,7 +386,7 @@ export default function SafePlacesPage() {
                     onClick={() => {
                       setSelectedFilter('all');
                     }}
-                    className="inline-flex items-center space-x-1.5 bg-white hover:bg-zinc-200 text-black font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition-all"
+                    className="inline-flex items-center space-x-1.5 bg-white hover:bg-zinc-200 text-black font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition-all shadow-md"
                   >
                     <span>SHOW ALL HAVENS</span>
                   </button>
@@ -411,11 +415,11 @@ export default function SafePlacesPage() {
         </>
       ) : !isLoadingLocation ? (
         /* Prompt user to search or grant GPS */
-        <div className="glass-panel rounded-3xl p-12 text-center border border-white/[0.08] space-y-4">
-          <MapPin className="w-8 h-8 text-zinc-400 mx-auto" />
+        <div className="glass-panel rounded-3xl p-12 text-center border border-white/15 space-y-4">
+          <MapPin className="w-8 h-8 text-zinc-300 mx-auto" />
           <div className="space-y-1 font-mono">
-            <h3 className="font-bold text-base text-white uppercase tracking-wider">Search Any Location to Begin</h3>
-            <p className="text-xs text-zinc-400 font-sans font-light max-w-sm mx-auto">
+            <h3 className="font-bold text-base text-white uppercase tracking-wider text-shadow-subtle">Search Any Location to Begin</h3>
+            <p className="text-xs text-zinc-200 font-sans font-normal max-w-sm mx-auto">
               Type your locality, street, or landmark in the search box above to discover nearby safe havens and calculate live Safe Scores.
             </p>
           </div>
