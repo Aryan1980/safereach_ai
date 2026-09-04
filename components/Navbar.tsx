@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 import { 
   Menu, 
   X, 
-  Radio,
-  PhoneCall,
-  AlertTriangle
+  Radio, 
+  PhoneCall, 
+  AlertTriangle 
 } from 'lucide-react';
 import { getPrimaryContact, getLastKnownLocation } from '@/services/contactsStorage';
 import { generateEmergencyPayload } from '@/services/emergencyMessage';
@@ -85,23 +85,23 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[#050508]/85 backdrop-blur-xl border-b border-white/[0.07] text-white">
+      <header className="sticky top-0 z-50 bg-[#06060c]/92 backdrop-blur-2xl border-b border-white/10 text-white shadow-xl shadow-black/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-black font-black text-xs tracking-tighter group-hover:bg-zinc-200 transition-colors">
+              <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-black font-black text-xs tracking-tighter group-hover:bg-zinc-200 transition-colors shadow-md">
                 SR
               </div>
               <div className="flex items-center space-x-1.5 font-mono text-sm tracking-wider uppercase">
-                <span className="font-extrabold text-white">SAFEREACH</span>
-                <span className="text-zinc-500 font-medium">/</span>
-                <span className="text-zinc-400 text-xs font-semibold">AI</span>
+                <span className="font-extrabold text-white text-shadow-subtle">SAFEREACH</span>
+                <span className="text-zinc-400 font-medium">/</span>
+                <span className="text-zinc-200 text-xs font-semibold">AI</span>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1 lg:space-x-3 font-mono text-[11px] tracking-widest text-zinc-400 uppercase">
+            <nav className="hidden md:flex items-center space-x-1 lg:space-x-3 font-mono text-[11px] tracking-widest text-zinc-200 uppercase">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -110,8 +110,8 @@ export default function Navbar() {
                     href={link.href}
                     className={`px-3 py-1.5 rounded-lg transition-all ${
                       isActive
-                        ? 'text-white font-bold bg-white/[0.08] border border-white/[0.12]'
-                        : 'hover:text-white hover:bg-white/[0.03]'
+                        ? 'text-white font-bold bg-white/[0.12] border border-white/20 shadow-md'
+                        : 'hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     {link.name}
@@ -124,16 +124,16 @@ export default function Navbar() {
             <div className="flex items-center space-x-3">
               {/* GPS status pill */}
               <div 
-                className="hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider border bg-white/[0.02] border-white/[0.08] text-zinc-400"
+                className="hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider border bg-black/60 border-white/15 text-zinc-200 backdrop-blur-md"
               >
                 <Radio className={`w-3 h-3 ${
                   gpsStatus === 'active' 
                     ? 'text-emerald-400 animate-pulse' 
                     : gpsStatus === 'denied' 
                     ? 'text-amber-400' 
-                    : 'text-zinc-500'
+                    : 'text-zinc-400'
                 }`} />
-                <span>
+                <span className="font-semibold">
                   {gpsStatus === 'active' ? 'GPS: SYNCED' : gpsStatus === 'denied' ? 'GPS: MANUAL' : 'GPS: READY'}
                 </span>
               </div>
@@ -141,7 +141,7 @@ export default function Navbar() {
               {/* Quick SOS Trigger Button */}
               <button
                 onClick={handleQuickSosClick}
-                className="relative flex items-center space-x-2 bg-white hover:bg-zinc-200 text-black px-3.5 py-1.5 rounded-lg font-mono font-bold text-xs uppercase tracking-widest shadow-lg shadow-white/10 active:scale-95 transition-all"
+                className="relative flex items-center space-x-2 bg-white hover:bg-zinc-200 text-black px-3.5 py-1.5 rounded-lg font-mono font-bold text-xs uppercase tracking-widest shadow-xl shadow-white/20 active:scale-95 transition-all"
               >
                 <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
                 <span>SOS</span>
@@ -150,7 +150,7 @@ export default function Navbar() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
+                className="md:hidden p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-colors"
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -161,7 +161,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/[0.08] bg-[#07070a]/98 px-5 pt-3 pb-6 space-y-1 font-mono text-xs tracking-widest">
+          <div className="md:hidden border-t border-white/10 bg-[#07070e]/98 px-5 pt-3 pb-6 space-y-1 font-mono text-xs tracking-widest backdrop-blur-2xl">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -171,8 +171,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block px-3 py-2.5 rounded-lg transition-colors ${
                     isActive
-                      ? 'text-white font-bold bg-white/[0.08] border border-white/[0.12]'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                      ? 'text-white font-bold bg-white/[0.12] border border-white/20'
+                      : 'text-zinc-200 hover:text-white hover:bg-white/[0.06]'
                   }`}
                 >
                   {link.name}
@@ -180,11 +180,11 @@ export default function Navbar() {
               );
             })}
 
-            <div className="pt-3 mt-2 border-t border-white/[0.08] flex items-center justify-between">
-              <span className="text-[10px] text-zinc-500 uppercase">Emergency Helpline:</span>
+            <div className="pt-3 mt-2 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[10px] text-zinc-400 uppercase font-bold">Emergency Helpline:</span>
               <a
                 href="tel:112"
-                className="inline-flex items-center space-x-1.5 text-zinc-300 hover:text-white font-bold text-xs"
+                className="inline-flex items-center space-x-1.5 text-white font-bold text-xs"
               >
                 <PhoneCall className="w-3 h-3 text-rose-400" />
                 <span>DIAL 112</span>
@@ -197,25 +197,25 @@ export default function Navbar() {
       {/* Quick SOS Modal */}
       {quickSosModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="glass-panel rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl text-white relative border border-white/[0.14]">
+          <div className="glass-panel rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl text-white relative border border-white/20">
             <button
               onClick={() => setQuickSosModal(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.05]"
+              className="absolute top-5 right-5 text-zinc-300 hover:text-white p-1 rounded-lg hover:bg-white/[0.08]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">RAPID ALERT</span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-300 font-bold">RAPID ALERT</span>
                 <h3 className="text-lg font-bold text-white tracking-tight">Emergency SOS Dispatch</h3>
               </div>
             </div>
 
-            <div className="bg-black/60 border border-white/[0.08] rounded-xl p-4 mb-5 text-xs text-zinc-300 font-mono whitespace-pre-wrap leading-relaxed">
+            <div className="bg-black/80 border border-white/15 rounded-xl p-4 mb-5 text-xs text-zinc-100 font-mono whitespace-pre-wrap leading-relaxed">
               {emergencyText}
             </div>
 
@@ -232,7 +232,7 @@ export default function Navbar() {
 
               <a
                 href="tel:112"
-                className="flex items-center justify-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white font-mono font-bold py-3 px-4 rounded-xl border border-white/10 transition-all text-xs uppercase tracking-wider"
+                className="flex items-center justify-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white font-mono font-bold py-3 px-4 rounded-xl border border-white/20 transition-all text-xs uppercase tracking-wider"
               >
                 <PhoneCall className="w-3.5 h-3.5 text-rose-400" />
                 <span>Call 112 (Police)</span>
@@ -243,7 +243,7 @@ export default function Navbar() {
               <Link
                 href="/emergency"
                 onClick={() => setQuickSosModal(false)}
-                className="text-[11px] font-mono text-zinc-400 hover:text-zinc-200 uppercase tracking-wider underline underline-offset-4"
+                className="text-[11px] font-mono text-zinc-300 hover:text-white uppercase tracking-wider underline underline-offset-4"
               >
                 Emergency Console &rarr;
               </Link>

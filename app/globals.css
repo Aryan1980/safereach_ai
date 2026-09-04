@@ -4,7 +4,10 @@
 
 :root {
   --background: #050508;
-  --foreground: #ededed;
+  --foreground: #f8fafc;
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
 }
 
 body {
@@ -14,15 +17,16 @@ body {
   overflow-x: hidden;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Futuristic Ambient Background Grid */
 .bg-grid-subtle {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* High-End Diagonal Scanline / Hatch Texture (as seen on modern streaming & dark UI platforms) */
+/* High-End Diagonal Scanline / Hatch Texture */
 .bg-diagonal-stripes {
   background-image: repeating-linear-gradient(
     -45deg,
@@ -33,12 +37,13 @@ body {
   );
 }
 
-/* Glassmorphism Panels */
+/* Enhanced High-Contrast Glassmorphism Panels */
 .glass-panel {
-  background: rgba(12, 12, 18, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(10, 10, 16, 0.86);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .glass-panel-hover {
@@ -46,23 +51,32 @@ body {
 }
 
 .glass-panel-hover:hover {
-  background: rgba(18, 18, 26, 0.75);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(14, 14, 22, 0.92);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Crisp Text Shadows for Background Separation */
+.text-shadow-hero {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.text-shadow-subtle {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
 /* Monochromatic & Soft Glow Helpers */
 .glow-white-subtle {
-  box-shadow: 0 0 40px -10px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 40px -10px rgba(255, 255, 255, 0.15);
 }
 
 .glow-crimson-subtle {
-  box-shadow: 0 0 50px -10px rgba(225, 29, 72, 0.25);
+  box-shadow: 0 0 50px -10px rgba(225, 29, 72, 0.3);
 }
 
 /* Minimal Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -70,12 +84,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 /* Leaflet map dark styling & Keyless 100% Free Dark Tiles */
@@ -86,20 +100,20 @@ body {
   background: #07070a !important;
 }
 
-/* Dark mode filter on standard keyless OpenStreetMap tiles (Zero API key required, Zero watermark) */
+/* Dark mode filter on standard keyless OpenStreetMap tiles */
 .dark-map-tiles .leaflet-tile {
   filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.2) brightness(0.7);
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0c0c12 !important;
-  color: #ededed !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+  background: #0a0a10 !important;
+  color: #f4f4f5 !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9) !important;
 }
 
 .leaflet-popup-tip {
-  background: #0c0c12 !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: #0a0a10 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
 }

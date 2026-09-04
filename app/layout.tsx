@@ -37,23 +37,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-[#050508] text-zinc-100 antialiased selection:bg-rose-500 selection:text-white relative">
-        {/* Crisp & Bright Animated Background */}
+      <body className="min-h-screen flex flex-col bg-[#050508] text-slate-100 antialiased selection:bg-white selection:text-black relative">
+        {/* Animated Background GIF */}
         <div className="fixed inset-0 pointer-events-none -z-30 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/background.gif"
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover opacity-85 filter brightness-110 saturate-125 contrast-110"
+            className="w-full h-full object-cover opacity-75 filter brightness-105 saturate-125 contrast-115"
           />
         </div>
 
-        {/* Diagonal Scanline / Hatch Texture Layer (as in the reference design) */}
+        {/* Diagonal Scanline / Hatch Texture Layer */}
         <div className="fixed inset-0 pointer-events-none -z-20 bg-diagonal-stripes"></div>
 
-        {/* Smooth Vignette for Content Contrast */}
-        <div className="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-b from-black/40 via-transparent to-black/70"></div>
+        {/* High-Contrast Balanced Dark Scrim */}
+        <div className="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-b from-black/55 via-black/45 to-black/80"></div>
 
         <Navbar />
         <main className="flex-1 relative z-10">{children}</main>
