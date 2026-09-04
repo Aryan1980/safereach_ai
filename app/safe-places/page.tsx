@@ -51,6 +51,8 @@ export default function SafePlacesPage() {
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
 
   const loadPlacesForCoords = useCallback(async (coords: Coordinates, radius: number = 5000) => {
+    if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number') return;
+    
     setIsLoadingPlaces(true);
     setErrorMessage(null);
 
@@ -123,7 +125,7 @@ export default function SafePlacesPage() {
           setPermissionState('denied');
         } else {
           setPermissionState('error');
-          setErrorMessage('Unable to obtain live GPS fix. Please ensure location services are enabled on your device, or search manually below.');
+          setErrorMessage('Unable to obtain high-accuracy GPS fix. Please ensure location services are enabled on your device, or search manually below.');
         }
 
         const cached = getLastKnownLocation();
@@ -204,7 +206,7 @@ export default function SafePlacesPage() {
             Safe Place Locator
           </h1>
 
-          {/* Subtitle / Description - High Contrast Luminous Platinum Tone */}
+          {/* Subtitle / Description */}
           <p className="text-xs sm:text-sm text-zinc-100 font-normal max-w-xl leading-relaxed text-shadow-subtle drop-shadow-sm">
             Real-time geospatial discovery of safe havens with transparent, data-backed Safe Scores based on facility security, crowd footfall, and live proximity.
           </p>
@@ -397,6 +399,7 @@ export default function SafePlacesPage() {
                     <PlaceCard
                       key={place.id}
                       place={place}
+                      userCoords={userLocation || mapCenter}
                       isSelected={selectedPlace?.id === place.id}
                       onOpenScoreExplanation={() => setIsScoreModalOpen(true)}
                       onSelect={(p) => {

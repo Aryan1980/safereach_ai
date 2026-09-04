@@ -18,16 +18,17 @@ import {
   CheckCircle2,
   Info
 } from 'lucide-react';
-import { SafePlace, SafePlaceType } from '@/types/places';
+import { Coordinates, SafePlace, SafePlaceType } from '@/types/places';
 
 interface PlaceCardProps {
   place: SafePlace;
+  userCoords?: Coordinates | null;
   onSelect?: (place: SafePlace) => void;
   isSelected?: boolean;
   onOpenScoreExplanation?: () => void;
 }
 
-export default function PlaceCard({ place, onSelect, isSelected, onOpenScoreExplanation }: PlaceCardProps) {
+export default function PlaceCard({ place, userCoords, onSelect, isSelected, onOpenScoreExplanation }: PlaceCardProps) {
   const [isWhyExpanded, setIsWhyExpanded] = useState(false);
 
   const getTypeMeta = (type: SafePlaceType) => {
@@ -56,8 +57,19 @@ export default function PlaceCard({ place, onSelect, isSelected, onOpenScoreExpl
   };
 
   const meta = getTypeMeta(place.type);
-  const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  
+  // Build exact origin -> destination Google Maps direction URL
+  const originParam = userCoords ? `&origin=${userCoords.lat},${userCoords.lng}` : '';
+  const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1${originParam}&destination=${place.lat},${place.lng}`;
+  
   const safeScore = place.safeScore;
+
+  // Format distance accurately
+  const formattedDistance = typeof place.distanceKm === 'number'
+    ? place.distanceKm < 1
+      ? `${Math.round(place.distanceKm * 1000)} M`
+      : `${place.distanceKm.toFixed(2)} KM`
+    : 'NEARBY';
 
   return (
     <div
@@ -84,11 +96,7 @@ export default function PlaceCard({ place, onSelect, isSelected, onOpenScoreExpl
 
           <div className="flex items-center space-x-1 text-white font-bold bg-white/10 border border-white/20 px-2.5 py-0.5 rounded-md shadow-sm">
             <Navigation className="w-3 h-3 text-emerald-400" />
-            <span>
-              {place.distanceKm < 1
-                ? `${Math.round(place.distanceKm * 1000)} M`
-                : `${place.distanceKm.toFixed(2)} KM`}
-            </span>
+            <span>{formattedDistance}</span>
           </div>
         </div>
 

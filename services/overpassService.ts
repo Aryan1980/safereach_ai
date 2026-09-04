@@ -2,20 +2,42 @@ import { Coordinates, SafePlace, SafePlaceType } from '@/types/places';
 import { calculateSafeScore } from './safetyScoring';
 
 /**
- * Calculates Haversine distance in Kilometers between two coordinates
+ * Calculates accurate geodesic distance in Kilometers between two coordinates using the Haversine formula.
+ * @param lat1 Latitude of point 1 in degrees (-90 to +90)
+ * @param lon1 Longitude of point 1 in degrees (-180 to +180)
+ * @param lat2 Latitude of point 2 in degrees (-90 to +90)
+ * @param lon2 Longitude of point 2 in degrees (-180 to +180)
+ * @returns Geodesic distance in kilometers rounded to two decimal places
  */
 export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  if (
+    typeof lat1 !== 'number' || isNaN(lat1) ||
+    typeof lon1 !== 'number' || isNaN(lon1) ||
+    typeof lat2 !== 'number' || isNaN(lat2) ||
+    typeof lon2 !== 'number' || isNaN(lon2)
+  ) {
+    return 0;
+  }
+
+  // Ensure coordinates are within valid geographic bounds
+  if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90 || lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
+    return 0;
+  }
+
+  const R = 6371; // Earth's mean radius in km
+  const toRad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toRad;
+  const dLon = (lon2 - lon1) * toRad;
+
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c * 100) / 100;
+  const distance = R * c;
+
+  // Round to 2 decimal places (e.g. 0.35 km, 1.24 km)
+  return Math.round(distance * 100) / 100;
 }
 
 const OVERPASS_ENDPOINTS = [
@@ -110,34 +132,50 @@ function buildOverpassQuery(lat: number, lng: number, radiusMeters: number): str
 
 /**
  * Queries OpenStreetMap Overpass API for real-world safe havens.
- * Automatically calculates dynamic Safe Scores based on the user's exact coordinates.
+ * Accurately calculates geodesic distances and safe scores relative to the user's coordinates.
  */
 export async function fetchNearbySafePlaces(coords: Coordinates, radiusMeters: number = 5000): Promise<SafePlace[]> {
   const { lat, lng } = coords;
 
-  // 1. First attempt at requested radius
-  let places = await executeQueryWithFallback(lat, lng, radiusMeters);
+  // Strict coordinate validation
+  if (
+    typeof lat !== 'number' || isNaN(lat) || lat < -90 || lat > 90 ||
+    typeof lng !== 'number' || isNaN(lng) || lng < -180 || lng > 180
+  ) {
+    console.error('Invalid coordinates passed to fetchNearbySafePlaces:', coords);
+    return [];
+  }
 
-  // 2. Adaptive radius expansion: If zero places found, auto-expand up to 12km
-  if (places.length === 0 && radiusMeters < 12000) {
-    const expandedRadius = Math.max(radiusMeters * 2, 10000);
-    places = await executeQueryWithFallback(lat, lng, expandedRadius);
+  const requestedRadiusKm = radiusMeters / 1000;
+
+  // 1. First attempt at requested radius
+  let places = await executeQueryWithFallback(lat, lng, radiusMeters, requestedRadiusKm);
+
+  // 2. Adaptive radius expansion ONLY if 0 places found and initial radius was small (< 8km)
+  if (places.length === 0 && radiusMeters < 8000) {
+    const fallbackRadiusMeters = 8000;
+    places = await executeQueryWithFallback(lat, lng, fallbackRadiusMeters, 8.0);
   }
 
   // Count nearby emergency anchors (police / hospital) to enhance coverage score
   const emergencyCount = places.filter((p) => p.type === 'police' || p.type === 'hospital').length;
 
-  // Calculate dynamic Safe Score for each location
+  // Calculate dynamic Safe Score for each location using the exact same coordinates and distance
   const scoredPlaces = places.map((place) => ({
     ...place,
     safeScore: calculateSafeScore(place, emergencyCount),
   }));
 
-  // Sort by distance ascending
+  // Sort strictly by distance ascending so the nearest safe haven is always first
   return scoredPlaces.sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
-async function executeQueryWithFallback(lat: number, lng: number, radiusMeters: number): Promise<SafePlace[]> {
+async function executeQueryWithFallback(
+  lat: number,
+  lng: number,
+  radiusMeters: number,
+  maxAllowedRadiusKm: number
+): Promise<SafePlace[]> {
   const query = buildOverpassQuery(lat, lng, radiusMeters);
   let lastError: Error | null = null;
 
@@ -159,7 +197,7 @@ async function executeQueryWithFallback(lat: number, lng: number, radiusMeters: 
       }
 
       const data: OverpassResponse = await response.json();
-      return parseOverpassElements(data.elements || [], lat, lng);
+      return parseOverpassElements(data.elements || [], lat, lng, maxAllowedRadiusKm);
     } catch (err) {
       console.warn(`Overpass query failed on ${endpoint}:`, err);
       lastError = err as Error;
@@ -172,14 +210,29 @@ async function executeQueryWithFallback(lat: number, lng: number, radiusMeters: 
   return [];
 }
 
-function parseOverpassElements(elements: OverpassElement[], userLat: number, userLng: number): SafePlace[] {
+function parseOverpassElements(
+  elements: OverpassElement[],
+  userLat: number,
+  userLng: number,
+  maxAllowedRadiusKm: number
+): SafePlace[] {
   const results: SafePlace[] = [];
   const seenIds = new Set<string>();
 
   for (const el of elements) {
-    const lat = el.lat ?? el.center?.lat;
-    const lon = el.lon ?? el.center?.lon;
-    if (!lat || !lon) continue;
+    // Correctly resolve latitude and longitude from node or way center
+    const lat = typeof el.lat === 'number' ? el.lat : typeof el.center?.lat === 'number' ? el.center.lat : null;
+    const lon = typeof el.lon === 'number' ? el.lon : typeof el.center?.lon === 'number' ? el.center.lon : null;
+
+    // Strict validation of coordinates
+    if (
+      lat === null || lon === null ||
+      isNaN(lat) || isNaN(lon) ||
+      lat < -90 || lat > 90 ||
+      lon < -180 || lon > 180
+    ) {
+      continue;
+    }
 
     const tags = el.tags || {};
     const amenity = tags.amenity || '';
@@ -268,6 +321,14 @@ function parseOverpassElements(elements: OverpassElement[], userLat: number, use
       continue;
     }
 
+    const dist = calculateDistanceKm(userLat, userLng, lat, lon);
+
+    // Strict distance ceiling: Exclude any place exceeding the search radius
+    // (with 10% polygon tolerance, never return places further away)
+    if (dist > maxAllowedRadiusKm * 1.1) {
+      continue;
+    }
+
     const name = tags.name || tags['name:en'] || defaultName;
     const id = `${el.type}_${el.id}`;
 
@@ -294,8 +355,6 @@ function parseOverpassElements(elements: OverpassElement[], userLat: number, use
     const is24x7 = openingHours
       ? openingHours.includes('24/7')
       : type === 'police' || type === 'hospital' || type === 'fuel_station' || type === 'hotel' || type === 'fire_station';
-
-    const dist = calculateDistanceKm(userLat, userLng, lat, lon);
 
     results.push({
       id,
